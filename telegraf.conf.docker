@@ -1,0 +1,53 @@
+[global_tags]
+cluster_id="${CLUSTER_ID}"
+datacenter="${CLUSTER_ID}"
+
+[agent]
+  interval = "30s"
+  round_interval = false
+  metric_batch_size = 4800
+  metric_buffer_limit = 9600
+  collection_jitter = "3s"
+  flush_interval = "35s"
+  flush_jitter = "3s"
+  precision = ""
+  debug = true
+  quiet = false
+  logfile = ""
+  hostname = "${HOSTNAME}"
+  omit_hostname = false
+
+
+[[inputs.influxdb_listener]]
+  ## Address and port to host HTTP listener on
+  service_address = ":8186"
+  read_timeout = "10s"
+  write_timeout = "30s"
+
+
+[[outputs.influxdb_v2]]
+  alias = "telemetry"
+  urls = ["${WATCHER_URL}"]
+  bucket = "${WATCHER_BUCKET}"
+  token = "${WATCHER_TOKEN}"
+  timeout = "30s"
+  concurrent_writes = 1
+  content_encoding = "gzip"
+
+
+[[inputs.internal]]
+[[inputs.cpu]]
+  percpu = false
+  totalcpu = true
+  fieldexclude = ["usage_guest", "usage_steal"]
+[[inputs.mem]]
+[[inputs.disk]]
+mount_points = ["/","/u01"]
+[[inputs.diskio]]
+[[inputs.processes]]
+use_sudo = true
+[[inputs.system]]
+    fielddrop = ["n_users"]
+[[inputs.docker]]
+  endpoint = "unix:///var/run/docker.sock"
+  namepass = [ "docker", "docker_container_cpu", "docker_container_mem", "docker_container_status"]
