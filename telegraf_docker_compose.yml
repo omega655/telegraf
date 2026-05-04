@@ -1,0 +1,36 @@
+services:
+  telegraf:
+    image: telegraf:latest
+    container_name: telegraf
+    user: 1000:998 # this is the UID of the user and the docker group
+    restart: "always"
+    volumes:       # some additional maps to gather docker info
+      - /u01/compose/telegraf.conf:/etc/telegraf/telegraf.conf:ro
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - /sys:/rootfs/sys:ro
+      - /proc:/rootfs/proc:ro
+      - /etc:/rootfs/etc:ro
+      - /var/log/syslog:/var/log/syslog_host:ro
+
+    environment:
+      - HOST_PROC=/rootfs/proc
+      - HOST_SYS=/rootfs/sys
+      - HOST_ETC=/rootfs/etc
+      - HOSTNAME=${HOSTNAME}
+      - CLUSTER_ID=${CLUSTER_ID}
+      - WATCHER_URL=${WATCHER_URL}
+      - WATCHER_TOKEN=${WATCHER_TOKEN}
+      - WATCHER_BUCKET=${WATCHER_BUCKET}
+
+    cap_add:
+      - SYS_PTRACE
+
+    ports:
+      - "8186:8186"
+      - "8086:8086"
+
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "100m"
+        max-file: "5"
